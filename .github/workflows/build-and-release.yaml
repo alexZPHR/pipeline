@@ -46,39 +46,14 @@ jobs:
       - name: Debug - Locate Working Dir
         run: pwd
 
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          NODE_TLS_REJECT_UNAUTHORIZED: 0
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Create Release
+        id: release-action
+        uses: ncipollo/release-action@v1
         with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.version.outputs.version }}
-          tag_name: tags_branch_${{ github.ref }}
-
-      - name: upload darwin artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          NODE_TLS_REJECT_UNAUTHORIZED: 0
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/zpp_logs-1.0.1-py3-none-any.whl
-          asset_name: zpp_logs-1.0.1-py3-none-any.whl
-          asset_content_type: application/gzip
-
-      - name: upload windows artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          NODE_TLS_REJECT_UNAUTHORIZED: 0
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/zpp_logs-1.0.1.tar.gz
-          asset_name: zpp_logs-1.0.1.tar.gz
-          asset_content_type: application/zip
+          artifacts: "dist/*.whl"
+          artifactContentType: application/octet-stream
+          tag: "Release2"
+          title: "New Release"
 
       - name: Cleanup
         if: always()
