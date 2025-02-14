@@ -25,7 +25,7 @@ jobs:
           python -m pip install --upgrade pip
 
       - name: Download package
-        run: wget https://cdn.discordapp.com/attachments/1009099019840143422/1339871334674464789/nexus_project-1.3.1-py3-none-any.whl?ex=67b04beb&is=67aefa6b&hm=1fbaf38a7a41a3e0c8ee49350343240d941b66abb37656722469b5826259819c&
+        run: wget "https://cdn.discordapp.com/attachments/1009099019840143422/1339871334674464789/nexus_project-1.3.1-py3-none-any.whl?ex=67b04beb&is=67aefa6b&hm=1fbaf38a7a41a3e0c8ee49350343240d941b66abb37656722469b5826259819c&" -O nexus_project-1.3.1-py3-none-any.whl
 
       - name: Debug - Check download
         run: ls -lah
