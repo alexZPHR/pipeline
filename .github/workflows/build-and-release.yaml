@@ -1,0 +1,84 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: linux_amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@main
+
+      - name: Set up Python
+        uses: actions/setup-python@main
+        with:
+          python-version: '3.11'
+
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+
+      - name: Download package
+        run: wget https://cdn.discordapp.com/attachments/1009099019840143422/1339871334674464789/nexus_project-1.3.1-py3-none-any.whl?ex=67b04beb&is=67aefa6b&hm=1fbaf38a7a41a3e0c8ee49350343240d941b66abb37656722469b5826259819c&
+
+      - name: Debug - Check download
+        run: ls -lah
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          python -m pip install nexus_project-1.3.1-py3-none-any.whl
+
+      - name: Compile project
+        run: |
+          source venv/bin/activate
+          nxs pack
+
+      - name: Debug - List dist directory
+        run: ls -lah dist/
+
+      - name: Debug - Locate Working Dir
+        run: pwd
+
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: tags_branch_${{ github.ref }}
+
+      - name: upload darwin artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/zpp_logs-1.0.1-py3-none-any.whl
+          asset_name: zpp_logs-1.0.1-py3-none-any.whl
+          asset_content_type: application/gzip
+
+      - name: upload windows artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/zpp_logs-1.0.1.tar.gz
+          asset_name: zpp_logs-1.0.1.tar.gz
+          asset_content_type: application/zip
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf venv
